@@ -4,33 +4,26 @@ import time
 
 
 def reliably_execute(
-        function,
-        *args,
-        **kwargs
+        partial_function,
+        retry=3,
+        wait=5,
 ):
-    """Helper function to reliably execute the provided function"""
-    if 'reliable_retry' in kwargs.keys():
-        reliable_retry = kwargs.pop('reliable_retry')
-    else:
-        reliable_retry = 3
-
-    if 'reliable_wait' in kwargs.keys():
-        reliable_wait = kwargs.pop('reliable_wait')
-    else:
-        reliable_wait = 5
-
-    remaining_tries = reliable_retry + 1
+    """Helper function to reliably execute the provided partial function"""
+    remaining_tries = retry + 1
 
     while remaining_tries > 0:
         remaining_tries -= 1
         try:
-            return function(*args, **kwargs)
+            return partial_function()
         # We catch Exception here because we don't know what kind it could be
         except Exception as exception:
             if remaining_tries:
-                time.sleep(reliable_wait)
+                time.sleep(wait)
                 continue
             raise RuntimeError(
                 'Could not reliably execute "{}" because of "{}"'
-                .format(function, exception)
+                .format(
+                    partial_function if hasattr(partial_function, 'func') else partial_function,
+                    exception,
+                )
             )

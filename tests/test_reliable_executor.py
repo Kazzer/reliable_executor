@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Tests for the reliable_executor module"""
+import functools
 import random
 import unittest
 
@@ -35,10 +36,12 @@ class ReliablyExecuteTest(unittest.TestCase):
     def test_success_without_failures(self):
         """Tests that the correct result is returned if the function doesn't fail"""
         result = reliable_executor.reliably_execute(
-            self.intermittent_function,
-            self.intermittent_result(),
-            reliable_retry=0,
-            reliable_wait=0,
+            functools.partial(
+                self.intermittent_function,
+                self.intermittent_result(),
+            ),
+            retry=0,
+            wait=0,
         )
 
         self.assertEqual(result, 0)
@@ -46,10 +49,12 @@ class ReliablyExecuteTest(unittest.TestCase):
     def test_success_with_failures(self):
         """Tests that the correct result is returned if the function fails"""
         result = reliable_executor.reliably_execute(
-            self.intermittent_function,
-            self.intermittent_result(self.number_of_fails),
-            reliable_retry=self.number_of_fails,
-            reliable_wait=0,
+            functools.partial(
+                self.intermittent_function,
+                self.intermittent_result(self.number_of_fails),
+            ),
+            retry=self.number_of_fails,
+            wait=0,
         )
 
         self.assertEqual(result, 0)
@@ -58,8 +63,10 @@ class ReliablyExecuteTest(unittest.TestCase):
         """Tests that an exception is raised if the function doesn't succeed"""
         with self.assertRaises(RuntimeError):
             reliable_executor.reliably_execute(
-                self.intermittent_function,
-                self.intermittent_result(self.number_of_fails),
-                reliable_retry=(self.number_of_fails - 1),
-                reliable_wait=0,
+                functools.partial(
+                    self.intermittent_function,
+                    self.intermittent_result(self.number_of_fails),
+                ),
+                retry=(self.number_of_fails - 1),
+                wait=0,
             )
