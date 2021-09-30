@@ -21,9 +21,5 @@ def reliably_execute(
                 time.sleep(wait)
                 continue
             raise RuntimeError(
-                'Could not reliably execute "{}" because of "{}"'
-                .format(
-                    partial_function if hasattr(partial_function, 'func') else partial_function,
-                    exception,
-                )
+                f'Could not reliably execute "{partial_function}" because of "{exception}"',
             )
