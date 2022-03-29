@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 """Reliable executor for intermittently failing functions"""
+import functools
 import time
 
 
 def reliably_execute(
-        partial_function,
-        retry=3,
-        wait=5,
+        partial_function: functools.partial,
+        *,
+        retry: int=3,
+        wait: int=5,
 ):
     """Helper function to reliably execute the provided partial function"""
-    remaining_tries = retry + 1
+    remaining_tries: int = retry + 1
 
     while remaining_tries > 0:
         remaining_tries -= 1
